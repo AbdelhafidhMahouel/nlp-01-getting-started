@@ -15,6 +15,7 @@
 
 [project]
 name = "nlp"               # CUSTOM: Package distribution name (use lowercase and dashes).
+description = "Web Mining and Applied NLP project by Abdelhafidh Mahouel"
 readme = "README.md"
 requires-python = ">=3.14"
 version = "0.1.0"

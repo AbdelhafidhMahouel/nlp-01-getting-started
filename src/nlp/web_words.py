@@ -1,5 +1,9 @@
 """web_words.py - Project script (example).
 
+Author: Abdelhafidh Mahouel
+Date: 2026-10
+
+
 Purpose
 
   Retrieve a web page, extract its text, count word frequencies,
