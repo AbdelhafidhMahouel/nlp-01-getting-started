@@ -2,6 +2,7 @@
 
 Author: Abdelhafidh Mahouel
 Date: 2026-11
+Modified: 2026-11 (v2 rules: allergens vs color additives, more categories)
 
 Purpose
 
@@ -41,7 +42,7 @@ import polars as pl
 import requests
 from wordcloud import WordCloud
 
-from nlp.recall_rules import RECALL_STOP_WORDS, categorize_reason
+from nlp.recall_rules import OTHER_CATEGORY, RECALL_STOP_WORDS, categorize_reason
 from nlp.text_cleaning import DEFAULT_STOP_WORDS, clean_tokens
 
 print("Imports complete.")
@@ -125,6 +126,14 @@ cause_df: pl.DataFrame = df.group_by("cause").len().sort("len", descending=True)
 
 print("Recalls by root cause:")
 print(cause_df)
+
+# Inspect what the rules still miss, so the rules can be improved.
+other_reasons: list[str] = (
+    df.filter(pl.col("cause") == OTHER_CATEGORY)["reason"].head(15).to_list()
+)
+print(f"Sample of reasons still labeled '{OTHER_CATEGORY}':")
+for reason in other_reasons:
+    print(f"- {reason[:150]}")
 
 
 # ============================================================

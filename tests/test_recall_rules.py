@@ -32,6 +32,31 @@ def test_undeclared_allergen() -> None:
     assert categorize_reason(reason) == "Undeclared allergen"
 
 
+def test_allergen_wins_over_color() -> None:
+    reason = "Contains undeclared milk and FD&C Yellow No. 5"
+    assert categorize_reason(reason) == "Undeclared allergen"
+
+
+def test_color_additive_is_not_an_allergen() -> None:
+    reason = "Product contains undeclared FD&C Yellow No. 5"
+    assert categorize_reason(reason) == "Color additive"
+
+
+def test_salmonella_is_not_salmon() -> None:
+    reason = "Possible Salmonella contamination of smoked salmon"
+    assert categorize_reason(reason) == "Salmonella"
+
+
+def test_undeclared_other_ingredient() -> None:
+    reason = "Product contains undeclared sulfites"
+    assert categorize_reason(reason) == "Undeclared ingredient (other)"
+
+
+def test_unapproved_substance() -> None:
+    reason = "Product contains undeclared sildenafil"
+    assert categorize_reason(reason) == "Unapproved substance"
+
+
 def test_foreign_material() -> None:
     reason = "Pieces of metal found in the product"
     assert categorize_reason(reason) == "Foreign material"
@@ -40,6 +65,11 @@ def test_foreign_material() -> None:
 def test_process_control() -> None:
     reason = "Under-processing may allow growth of Clostridium botulinum"
     assert categorize_reason(reason) == "Process control"
+
+
+def test_other_pathogen() -> None:
+    reason = "Potential contamination with Cyclospora"
+    assert categorize_reason(reason) == "Other pathogen or microbial"
 
 
 def test_other() -> None:
