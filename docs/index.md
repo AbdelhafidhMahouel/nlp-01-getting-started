@@ -186,6 +186,8 @@ corpus exploration, and natural language processing.
 - [Text Cleaning Module](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/src/nlp/text_cleaning.py)
 - [Example Script](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/src/nlp/web_words.py)
 - [Example Notebook](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/notebooks/web_words.ipynb)
+- [Original Example Project](https://github.com/denisecase/nlp-01-getting-started)
+- [openFDA Food Enforcement API](https://open.fda.gov/apis/food/enforcement/)
 
 ## Project Resources
 
