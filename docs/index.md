@@ -5,32 +5,28 @@ Web Mining and Applied NLP | Project 01 | Abdelhafidh Mahouel
 ## Overview
 
 This project establishes a professional Python environment
-for acquiring and analyzing text from web pages.
+for acquiring and analyzing text from the web.
 
-The objective is to demonstrate that a Python project can
-retrieve web content, extract text, compute word frequencies,
-and produce visualizations using a reproducible workflow.
+It starts from the course example (word frequencies on a Wikipedia page),
+improves the text cleaning (D2), and then applies the same tools
+to a real food manufacturing problem (D3):
+**what is driving U.S. food recalls?**
 
 ## Tools and Methods
 
 The project uses:
 
 - Python for text acquisition and analysis.
-- Requests for retrieving HTML from web pages.
+- Requests for retrieving HTML from web pages and JSON from web APIs.
 - BeautifulSoup for parsing HTML and extracting text.
-- Polars for computing word frequencies.
-- Matplotlib for frequency visualizations.
+- A reusable, tested `clean_tokens()` function (regex and stop words).
+- Keyword rules (`recall_rules.py`) to group recall reasons into root causes.
+- Polars for counting, grouping, and severity statistics.
+- Matplotlib for bar charts.
 - WordCloud for visual exploration of vocabulary.
 - Logging for execution records.
-- Ruff, ty, and pytest for code verification.
+- Ruff, ty, and pytest for code verification (20 automated tests).
 - Zensical and GitHub Pages for published documentation.
-
-The example script retrieves a Wikipedia article,
-extracts text, cleans words,
-and calculates token frequencies.
-
-The analysis produces a frequency bar chart
-and a word cloud.
 
 ## Verification
 
@@ -38,13 +34,11 @@ A successful execution displays:
 
     Pipeline executed successfully!
 
-The script records execution details in a project log.
+The scripts record execution details in a project log.
 
-These results demonstrate that the environment can
-retrieve, process, and visualize web text.
+Automated tests verify the text cleaning and the recall cause rules:
 
-Automated tests provide additional verification
-of the project's expected behavior.
+    uv run python -m pytest
 
 ## Experiment (D2): Better Text Cleaning
 
@@ -74,7 +68,99 @@ Some noise remains from the Wikipedia page itself
 (for example "edit", "retrieved", "isbn" from menus and references),
 which a later step could remove by extracting only the article body.
 
-## Interpretation
+## Custom Project (D3): What Is Driving U.S. Food Recalls?
+
+### Question
+
+I work in food manufacturing. I wanted to know what is actually causing
+food recalls right now: pathogen contamination (Listeria, Salmonella, E. coli),
+labeling problems (undeclared allergens), or process failures
+(foreign material, under-processing). I also wanted to know which causes
+are the most serious, because that shows where a plant's food safety
+and quality efforts matter most.
+
+### Data
+
+- Source: [openFDA Food Enforcement API](https://open.fda.gov/apis/food/enforcement/)
+  (public domain, no API key needed).
+- The 1,000 most recent food recall reports, dated February 11 to October 28, 2026.
+- Fields used: `reason_for_recall` (free text), `classification`
+  (Class I, II, or III), `report_date`, and `recall_number`.
+- Class I is the most serious: a reasonable chance of serious health
+  consequences or death.
+
+### Process
+
+1. Download the recall records as JSON with Requests.
+2. Build a Polars table and label each recall reason with a root cause,
+   using transparent keyword rules in `src/nlp/recall_rules.py`
+   (first matching rule wins, most serious causes checked first).
+3. Count recalls by cause and compute the share of Class I recalls per cause.
+4. Clean the recall text with the D2 `clean_tokens()` function plus
+   recall-specific stop words, and count the most frequent words.
+5. Save the charts to `docs/images` automatically.
+
+**Iteration:** The first version of the rules left 27% of recalls as "Other"
+and counted undeclared color additives (like FD&C Yellow No. 5) as allergens,
+because both reasons say "undeclared". I reviewed the results, matched
+allergens by the actual major food allergens, and added categories for
+color additives, unapproved substances, and other undeclared ingredients.
+"Other" dropped from 266 recalls to 47 (under 5%).
+Fourteen pytest tests check the rules.
+
+### Results
+
+![FDA recalls by root cause](images/fda_recall_causes.png)
+
+| Root cause | Recalls | Class I (most serious) |
+|---|---:|---:|
+| Undeclared allergen | 404 | 21.5% |
+| Salmonella | 182 | 95.6% |
+| Foreign material | 94 | 0.0% |
+| Color additive | 59 | 1.7% |
+| Unapproved substance | 54 | 16.7% |
+| Listeria | 50 | 90.0% |
+| Process control | 49 | 6.1% |
+| Other | 47 | 8.5% |
+| Other pathogen or microbial | 23 | 95.7% |
+| Undeclared ingredient (other) | 22 | 4.5% |
+| E. coli | 16 | 81.2% |
+
+![Most frequent words in recall reasons](images/fda_top_words.png)
+
+![Word cloud of recall reasons](images/fda_word_cloud.png)
+
+### Interpretation
+
+- **Allergen labeling causes the most recalls.** About 40% of recalls
+  are undeclared allergens, with milk by far the most frequent allergen word, followed by wheat and sesame.
+  This is mostly a labeling and changeover problem, not a contamination problem.
+- **Pathogens cause the most serious recalls.** Over 80% of Salmonella,
+  Listeria, E. coli, and other pathogen recalls are Class I.
+- **Foreign material is common but rarely serious.** It caused 94 recalls,
+  but none were Class I.
+
+For a food plant, this suggests two different priorities:
+label review and allergen changeover controls prevent the **most** recalls,
+while sanitation and pathogen controls prevent the most **harm**.
+
+### Limitations
+
+- Only the 1,000 most recent reports (about 8 months) are included.
+- Keyword rules are simple. A reason that mentions two hazards is counted
+  once, under the first matching rule.
+- One recall event can include many products, so counts reflect recalled
+  products, not separate incidents.
+- About 5% of reasons remain "Other" (spoilage, packaging defects,
+  nutrient levels, mislabeled products).
+
+### Next Steps
+
+- Pull more history (the API allows paging) to look at trends over time.
+- Count recall events instead of products to avoid double counting.
+- Break down allergen recalls by specific allergen.
+
+## Interpretation (Example Project)
 
 Web text contains both useful information and noise
 introduced by document structure and formatting.
@@ -95,9 +181,11 @@ corpus exploration, and natural language processing.
 ## Project Links
 
 - [GitHub Repository](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started)
-- [Project Script](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/src/nlp/web_words.py)
+- [FDA Recalls Script](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/src/nlp/fda_recalls.py)
+- [Recall Rules Module](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/src/nlp/recall_rules.py)
 - [Text Cleaning Module](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/src/nlp/text_cleaning.py)
-- [Project Notebook](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/notebooks/web_words.ipynb)
+- [Example Script](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/src/nlp/web_words.py)
+- [Example Notebook](https://github.com/AbdelhafidhMahouel/nlp-01-getting-started/blob/main/notebooks/web_words.ipynb)
 
 ## Project Resources
 

@@ -10,61 +10,68 @@
 [![Zensical docs](https://img.shields.io/badge/Zensical-docs-purple)](https://zensical.org/)
 [![MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-> Retrieve, process, and visualize text from the web using Python.
+> Retrieve, process, and analyze text from the web using Python,
+> applied to U.S. FDA food recall reasons.
 
 ## Project Overview
 
 Author: Abdelhafidh Mahouel
 
-Date: 2026 October
+Date: 2026 November
 
 First project in the Web Mining and Applied NLP course.
-This project starts from the course example and will be customized
-to analyze text from a different web page, with additional cleaning
-such as removing common stop words to get more meaningful results.
+
+The project has three parts:
+
+1. **Example:** word frequencies on the Wikipedia article on
+   Natural Language Processing (`web_words.py`).
+2. **Modification (D2):** text cleaning moved into a reusable, tested
+   `clean_tokens()` function that uses a regex and removes stop words.
+3. **Custom project (D3):** analyze the 1,000 most recent FDA food recalls
+   to answer: **what is driving U.S. food recalls, and which causes are
+   the most serious?** (`fda_recalls.py`)
 
 The project is configured in
 [pyproject.toml](pyproject.toml).
 
 ## Data
 
-The example retrieves HTML from a public web page
-using the Requests library.
+**Example:** HTML from the Wikipedia article on
+[Natural Language Processing](https://en.wikipedia.org/wiki/Natural_language_processing),
+retrieved with Requests and parsed with BeautifulSoup.
 
-BeautifulSoup parses the HTML and extracts text
-for analysis.
+**Custom project:** JSON from the
+[openFDA Food Enforcement API](https://open.fda.gov/apis/food/enforcement/)
+(public domain, no API key needed). Each record is one recalled product,
+with a free-text `reason_for_recall` and a `classification`
+(Class I is the most serious).
 
 No local input dataset is required.
 
-The example uses the Wikipedia article on
-[Natural Language Processing](https://en.wikipedia.org/wiki/Natural_language_processing).
-
 ## Approach
 
-The project uses Python to retrieve and analyze web text.
+The project demonstrates:
 
-The example demonstrates:
-
-- Retrieving HTML using HTTP requests.
+- Retrieving HTML from web pages and JSON from web APIs with Requests.
 - Parsing HTML and extracting text with BeautifulSoup.
-- Cleaning and normalizing text.
-- Counting word frequencies using Polars.
-- Visualizing frequent words using Matplotlib.
-- Creating word clouds to explore vocabulary patterns.
+- Cleaning text with a reusable, tested `clean_tokens()` function.
+- Grouping free-text recall reasons into root causes with transparent
+  keyword rules.
+- Counting, grouping, and severity statistics with Polars.
+- Visualizing results with Matplotlib bar charts and word clouds.
 
 Explore these important project components:
 
 - [pyproject.toml](pyproject.toml) - project identity, dependencies, and tool configuration.
-- [src/nlp/web_words.py](src/nlp/web_words.py) - executable Python analysis.
+- [src/nlp/web_words.py](src/nlp/web_words.py) - example analysis of a Wikipedia page.
+- [src/nlp/text_cleaning.py](src/nlp/text_cleaning.py) - reusable text cleaning (D2).
+- [src/nlp/recall_rules.py](src/nlp/recall_rules.py) - root-cause rules for recall reasons (D3).
+- [src/nlp/fda_recalls.py](src/nlp/fda_recalls.py) - custom FDA recall analysis (D3).
 - [notebooks/web_words.ipynb](notebooks/web_words.ipynb) - interactive Jupyter notebook example.
 - [tests/](tests/) - automated tests.
 - [.github/workflows/](.github/workflows/) - automated testing and documentation deployment.
-- [docs/](docs/) - project documentation.
+- [docs/](docs/) - project documentation and report.
 - [zensical.toml](zensical.toml) - documentation configuration.
-
-The goal is to get the project running,
-inspect the results, and understand the basic workflow
-for acquiring and analyzing text.
 
 ## Run the Project
 
@@ -73,21 +80,23 @@ to set up your machine and project environment.
 
 From a VS Code terminal in the project root:
 
+Run the custom FDA food recall analysis:
+
+```shell
+uv run python -m nlp.fda_recalls
+```
+
+Run the original example:
+
 ```shell
 uv run python -m nlp.web_words
 ```
 
 Close each visualization window after viewing
 so the script can continue executing.
-
-The Jupyter notebook provides an additional
-interactive version of the analysis.
+The FDA script also saves its charts to `docs/images/`.
 
 ## Results
-
-The example retrieves web text,
-computes word frequencies,
-and displays a frequency bar chart and word cloud.
 
 Successful execution produces:
 
@@ -99,16 +108,22 @@ Pipeline executed successfully!
 
 A `project.log` file is created in the project root.
 
-This confirms that the Python analysis executes
-and the logging system works.
+**Key findings (1,000 most recent FDA food recalls, Feb to Oct 2026):**
 
-### Example Visualization
+- **Undeclared allergens cause the most recalls** (404, about 40%).
+- **Pathogens cause the most serious recalls:** Salmonella (95.6% Class I),
+  Listeria (90.0%), and E. coli (81.2%).
+- **Foreign material is common but never Class I** (94 recalls, 0%).
 
-![Word Cloud Example](docs/images/word_cloud_example.png)
+![FDA recalls by root cause](docs/images/fda_recall_causes.png)
+
+See the [hosted documentation site](https://abdelhafidhmahouel.github.io/nlp-01-getting-started/)
+for the full report, including the D2 experiment, the results table,
+interpretation, and limitations.
 
 ## Verification
 
-Run the automated tests:
+Run the automated tests (20 tests for text cleaning and recall rules):
 
 ```shell
 uv run python -m pytest
@@ -119,8 +134,8 @@ uv run python -m pytest
 The [hosted documentation site](https://abdelhafidhmahouel.github.io/nlp-01-getting-started/)
 is published using Zensical and GitHub Pages.
 
-The documentation site is used to present the project report,
-covering such sections as data, methods, results, visualizations,
+The documentation site presents the project report,
+covering data, methods, results, visualizations,
 interpretation, and conclusions.
 
 ## CI/CD and GitHub Actions
@@ -218,5 +233,6 @@ testing, documentation, and code quality.
 
 - [Hosted Documentation](https://abdelhafidhmahouel.github.io/nlp-01-getting-started/)
 - [Professional Python Workflow Guide](https://denisecase.github.io/pro-analytics-02/)
+- [openFDA Food Enforcement API](https://open.fda.gov/apis/food/enforcement/)
 - [Citation](CITATION.cff)
 - [License](LICENSE)
