@@ -2,7 +2,7 @@
 
 Author: Abdelhafidh Mahouel
 Date: 2026-10
-
+Modified: 2026-11 (D2: text cleaning moved into a tested clean_tokens() function)
 
 Purpose
 
@@ -37,6 +37,8 @@ import matplotlib.pyplot as plt
 import polars as pl
 import requests
 from wordcloud import WordCloud
+
+from nlp.text_cleaning import clean_tokens
 
 print("Imports complete.")
 
@@ -127,10 +129,11 @@ print(text[:1000])
 
 
 # ============================================================
-# Section 5. Clean the Text (split, lowercase, remove punctuation)
+# Section 5. Clean the Text (regex tokens, lowercase, stop words)
 # ============================================================
 
 # Split the text into rough word-like pieces using whitespace.
+# (Kept so we can compare raw counts with cleaned counts.)
 words: list[str] = text.split()
 count_of_words: int = len(words)
 
@@ -138,18 +141,12 @@ print("First 20 raw words:")
 print(words[:20])
 print(f"Total raw words: {count_of_words:,}")
 
-# Convert all words to lowercase so "Language" and "language"
-# are counted as the same word.
-# Use a list comprehension (concise list to list transformation)
-# that creates a new lowercase list from a list of words.
-words = [word.lower() for word in words]
-
-# Strip out (remove) common punctuation from the beginning and end of words.
-# Keep only tokens longer than 3 characters to reduce noise.
-# Again, a list comprehension is great for simple list-to-list transformations.
-clean_words: list[str] = [
-    word.strip(".,:;!?()[]\"'") for word in words if len(word) > 3
-]
+# D2 modification (Abdelhafidh Mahouel, 2026-11):
+# Use the reusable, tested clean_tokens() function instead of a
+# simple split/strip. It lowercases the text, uses a regex to find
+# real words (so "e.g" and dates are not counted), drops short
+# words, and removes common stop words, so the counts focus on the topic.
+clean_words: list[str] = clean_tokens(text)
 count_of_clean_words: int = len(clean_words)
 
 print("First 20 cleaned words:")
